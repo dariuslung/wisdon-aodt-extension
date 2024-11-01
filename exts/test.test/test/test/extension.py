@@ -115,6 +115,11 @@ class TestTestExtension(omni.ext.IExt):
 
         def on_reset_count():
             self.ue_count = 1
+            stage = usd_context.get_stage()
+            scenario = omni.usd.get_prim_at_path('/Scenario')
+            num_ue_attr = scenario.GetProperty('sim:num_users')
+            omni.usd.set_prop_val(num_ue_attr, 0)
+
 
         # Window
         self._window = ui.Window("Test Extension", width=500, height=500)
@@ -135,7 +140,7 @@ class TestTestExtension(omni.ext.IExt):
                 with ui.HStack(height = 100):
                     ui.Button('Dupe UE', clicked_fn = on_dupe)
                     ui.Button('Fill UE', clicked_fn = on_fill_ue)
-                    ui.Button('Reset count', clicked_fn = on_reset_count)
+                    ui.Button('Reset UE count', clicked_fn = on_reset_count)
 
 
         # API
