@@ -4,6 +4,7 @@ import omni.kit.app
 import omni.kit.actions.core as actions
 import omni.usd
 from aodt.configuration.worker_manager import get_worker_manager_instance
+from aodt.telemetry import TelemetryExt
 
 # Ensure extensions enabled
 app = omni.kit.app.get_app()
@@ -43,7 +44,7 @@ class TestTestExtension(omni.ext.IExt):
         def on_play():
             actions.execute_action(extension_id = "omni.kit.widget.toolbar", action_id = "toolbar::play")
 
-        def on_dupe():
+        def on_duplicate():
             # Open stage
             # result, error_str = usd_context.open_stage_async(stage_url)
             
@@ -120,6 +121,21 @@ class TestTestExtension(omni.ext.IExt):
             num_ue_attr = scenario.GetProperty('sim:num_users')
             omni.usd.set_prop_val(num_ue_attr, 0)
 
+        def on_test():
+            stage = omni.usd.get_context().get_stage()
+            ue_telemetry = {}
+            for x in stage.Traverse():
+                name = x.GetName()
+                if x.GetName().split('_')[0] == 'ue':
+                    # stage.GetPrimAtPath(f"/UEs/{name}').GetAttribute(self.manual_str).Set(True)
+                    ue_path = f'/UEs/{name}'
+                    telemetry_data = TelemetryExt.get_ue_telemetry_data(ue_path)
+                    if telemetry_data is not None:
+                        ue_telemetry[ue_path] = telemetry_data
+            print(ue_telemetry)
+
+
+
 
         # Window
         self._window = ui.Window("Test Extension", width=500, height=500)
@@ -138,9 +154,10 @@ class TestTestExtension(omni.ext.IExt):
                 ui.Spacer(height = 30)
 
                 with ui.HStack(height = 100):
-                    ui.Button('Dupe UE', clicked_fn = on_dupe)
+                    ui.Button('Duplicate UE', clicked_fn = on_duplicate)
                     ui.Button('Fill UE', clicked_fn = on_fill_ue)
                     ui.Button('Reset UE count', clicked_fn = on_reset_count)
+                    ui.Button('Test', clicked_fn=on_test)
 
 
         # API
